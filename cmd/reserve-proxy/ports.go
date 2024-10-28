@@ -4,9 +4,9 @@ import "github.com/Joao-Tiago-Almeida/reverse-proxy/pkg/database/memory"
 
 type database interface {
 	Insert(map[string]interface{}) error
-	Find([]string) ([]interface{}, error)
-	FindOne(string) (interface{}, error)
-	DeleteOne(string) error
+	Find(map[string]string) ([]interface{}, error)
+	FindOne(string, string) (interface{}, error)
+	Delete(string, string) error
 }
 
 func initDatabase() database {

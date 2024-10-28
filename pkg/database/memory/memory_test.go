@@ -6,25 +6,29 @@ import (
 )
 
 var testData = []map[string]interface{}{
-	{"key1": "value1"},
-	{"key2": map[string]interface{}{"field2": "value2"}},
+	{"key": "value1"},
+	{"key": "value2", "key2": map[string]interface{}{"field2": "value2"}},
+	{"key": map[string]interface{}{"field": "value"}},
 }
 
 func TestFindOne(t *testing.T) {
 	tests := []struct {
-		name       string
-		desiredKey string
-		expected   interface{}
+		name         string
+		desiredKey   string
+		desiredValue string
+		expected     interface{}
 	}{
 		{
-			name:       "Existing key to string value",
-			desiredKey: "key1",
-			expected:   "value1",
+			name:         "Existing key to string value",
+			desiredKey:   "key",
+			desiredValue: "value1",
+			expected:     map[string]interface{}{"key": "value1"},
 		},
 		{
-			name:       "Existing key to map value",
-			desiredKey: "key2",
-			expected:   map[string]interface{}{"field2": "value2"},
+			name:         "Existing key to map value",
+			desiredKey:   "key",
+			desiredValue: "value2",
+			expected:     map[string]interface{}{"key": "value2", "key2": map[string]interface{}{"field2": "value2"}},
 		},
 		{
 			name:       "Empty key",
@@ -51,7 +55,7 @@ func TestFindOne(t *testing.T) {
 				m.Insert(data)
 			}
 
-			result, _ := m.FindOne(test.desiredKey)
+			result, _ := m.FindOne(test.desiredKey, test.desiredValue)
 			if !reflect.DeepEqual(result, test.expected) {
 				t.Errorf("TestFindOne(%s): have %v; want %v", test.name, result, test.expected)
 			}
@@ -70,24 +74,29 @@ func TestFind(t *testing.T) {
 	}
 
 	tests := []struct {
-		name          string
-		desiredValues []string
-		expected      []interface{}
+		name     string
+		filters  map[string]string
+		expected []interface{}
 	}{
 		{
-			name:          "Existing keys",
-			desiredValues: []string{"key1", "key2"},
-			expected:      []interface{}{"value1", map[string]interface{}{"field2": "value2"}},
+			name:     "Existing keys",
+			filters:  map[string]string{"key": "value1"},
+			expected: []interface{}{map[string]interface{}{"key": "value1"}},
 		},
 		{
-			name:          "Non-existing keys",
-			desiredValues: []string{"key3", "key4"},
-			expected:      nil,
+			name:     "Non-existing keys",
+			filters:  map[string]string{"": "value1"},
+			expected: nil,
 		},
 		{
-			name:          "Existing and non-existing keys",
-			desiredValues: []string{"key1", "key3"},
-			expected:      []interface{}{"value1"},
+			name:     "Non-existing values",
+			filters:  map[string]string{"key": ""},
+			expected: nil,
+		},
+		{
+			name:     "Existing and non-existing keys",
+			filters:  map[string]string{"key": "value1", "": "value1"},
+			expected: []interface{}{map[string]interface{}{"key": "value1"}},
 		},
 	}
 
@@ -106,7 +115,7 @@ func TestFind(t *testing.T) {
 				m.Insert(data)
 			}
 
-			result, _ := m.Find(test.desiredValues)
+			result, _ := m.Find(test.filters)
 			if !reflect.DeepEqual(result, test.expected) {
 				t.Errorf("TestFind(%s): have %v; want %v", test.name, result, test.expected)
 			}
@@ -114,7 +123,7 @@ func TestFind(t *testing.T) {
 	}
 }
 
-func TestDeleteOne(t *testing.T) {
+func TestDelete(t *testing.T) {
 	defer Drop()
 
 	var m memoryDB
@@ -126,16 +135,17 @@ func TestDeleteOne(t *testing.T) {
 	}
 
 	tests := []struct {
-		name       string
-		desiredKey string
+		name         string
+		desiredKey   string
+		desiredValue string
 	}{
 		{
-			name:       "Delete existing key",
-			desiredKey: "key1",
+			name:         "Delete existing key",
+			desiredKey:   "key",
+			desiredValue: "value1",
 		},
 		{
-			name:       "Delete non-existing key",
-			desiredKey: "key3",
+			name: "Delete non-existing key",
 		},
 	}
 
@@ -147,8 +157,8 @@ func TestDeleteOne(t *testing.T) {
 				}
 			}()
 
-			m.DeleteOne(test.desiredKey)
-			result, _ := m.FindOne(test.desiredKey)
+			m.Delete(test.desiredKey, test.desiredValue)
+			result, _ := m.FindOne(test.desiredKey, test.desiredValue)
 			if result != nil {
 				t.Errorf("TestDeleteOne(%s): key %s was not deleted", test.name, test.desiredKey)
 			}
@@ -177,13 +187,13 @@ func Test_checkIfExsits(t *testing.T) {
 		{
 			name: "FindOne",
 			f: func() {
-				m.FindOne("")
+				m.FindOne("", "")
 			},
 		},
 		{
-			name: "DeleteOne",
+			name: "Delete",
 			f: func() {
-				m.DeleteOne("")
+				m.Delete("", "")
 			},
 		},
 	}
