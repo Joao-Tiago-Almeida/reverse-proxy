@@ -14,7 +14,7 @@ type App struct {
 func (app App) Run() {
 	// Run the application
 	fmt.Println("Running the application")
-	values, _ := app.db.Find(map[string]string{"host": "iris"})
+	values, _ := app.db.Find(map[string]string{"host": "app1.example.com"})
 	fmt.Println("Data", values)
 }
 

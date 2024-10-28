@@ -101,8 +101,8 @@ func findAll() (dbCopy []map[string]interface{}) {
 func fill() {
 	// Data to be filled in the memory storage
 	data := []map[string]interface{}{
-		{"host": "tarkin", "alias": "localhoss:8002", "createdAt": "2024-10-28T09:00:00Z"},
-		{"host": "iris", "alias": "localhoss:8080", "createdAt": "2024-10-28T09:02:47Z"},
+		{"host": "app1.example.com", "alias": "localhoss:8002", "createdAt": "2024-10-28T09:00:00Z"},
+		{"host": "app2.example.com", "alias": "localhoss:8080", "createdAt": "2024-10-28T09:02:47Z"},
 	}
 
 	db = append(db, data...)

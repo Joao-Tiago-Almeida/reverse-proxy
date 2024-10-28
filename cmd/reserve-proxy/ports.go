@@ -1,6 +1,6 @@
 package main
 
-import "github.com/Joao-Tiago-Almeida/reverse-proxy/pkg/database/memory"
+import "github.com/Joao-Tiago-Almeida/reverse-proxy/internal/database/memory"
 
 type database interface {
 	Insert(map[string]interface{}) error
